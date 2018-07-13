@@ -4,19 +4,20 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 
+import co.evecon.stargame.base.ActionListener;
 import co.evecon.stargame.base.Base2DScreen;
-import co.evecon.stargame.base.Sprite;
 import co.evecon.stargame.math.Rect;
 import co.evecon.stargame.math.Rnd;
 import co.evecon.stargame.sprite.Background;
-import co.evecon.stargame.sprite.Button;
+import co.evecon.stargame.base.Button;
+import co.evecon.stargame.sprite.ExitButton;
+import co.evecon.stargame.sprite.PlayButton;
 import co.evecon.stargame.sprite.Star;
 
 
@@ -24,7 +25,7 @@ import co.evecon.stargame.sprite.Star;
  * Экран меню
  */
 
-public class MenuScreen extends Base2DScreen {
+public class MenuScreen extends Base2DScreen implements ActionListener {
 
 
     private Background background;
@@ -32,7 +33,12 @@ public class MenuScreen extends Base2DScreen {
     private int starAmount;
     private ArrayList<Star> star;
     private TextureAtlas atlas;
-    private Button playButton, exitButton;
+
+    private static final float PRESS_SCALE = 0.9f;
+    private static final float BUTTON_HEIGHT = 0.15f;
+
+    private ExitButton exitButton;
+    private PlayButton playButton;
 
     public MenuScreen(Game game) {
         super(game);
@@ -50,12 +56,10 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < starAmount ; i++) {
             star.add(new Star(starRegion, Rnd.nextFloat(-0.005f,0.005f), Rnd.nextFloat(-0.5f,-0.1f), 0.01f));
         }
-        TextureRegion playButtonRegion = atlas.findRegion("btPlay");
-        playButton = new Button(playButtonRegion,0.2f);
-        playButton.setLeft();
-        TextureRegion exitButtonRegion = atlas.findRegion("btExit");
-        exitButton = new Button(exitButtonRegion,0.2f);
-        exitButton.setRight();
+        exitButton = new ExitButton(atlas, PRESS_SCALE, this);
+        exitButton.setHeightProportion(BUTTON_HEIGHT);
+        playButton = new PlayButton(atlas, PRESS_SCALE, this);
+        playButton.setHeightProportion(BUTTON_HEIGHT);
     }
 
     @Override
@@ -79,8 +83,8 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < starAmount; i++) {
             star.get(i).draw(batch);
         }
-        playButton.draw(batch);
         exitButton.draw(batch);
+        playButton.draw(batch);
         batch.end();
     }
 
@@ -94,23 +98,15 @@ public class MenuScreen extends Base2DScreen {
     @Override
     public void touchDown(Vector2 touch, int pointer) {
         super.touchDown(touch, pointer);
-        if (playButton.isMe(touch)) {
-            playButton.setScale(0.5f);
-        }
-        if (exitButton.isMe(touch)) {
-            exitButton.setScale(0.5f);
-        }
+        exitButton.touchDown(touch, pointer);
+        playButton.touchDown(touch, pointer);
     }
 
     @Override
     public void touchUp(Vector2 touch, int pointer) {
         super.touchUp(touch, pointer);
-        if (playButton.isMe(touch)) {
-            playButton.setScale(1f);
-        }
-        if (exitButton.isMe(touch)) {
-            exitButton.setScale(1f);
-        }
+        exitButton.touchUp(touch, pointer);
+        playButton.touchUp(touch, pointer);
     }
 
     @Override
@@ -120,7 +116,19 @@ public class MenuScreen extends Base2DScreen {
         for (int i = 0; i < starAmount; i++) {
             star.get(i).resize(worldBounds);
         }
-        playButton.resize(worldBounds);
         exitButton.resize(worldBounds);
+        playButton.resize(worldBounds);
+    }
+
+    @Override
+    public void actionPerformed(Object src) {
+        if (src == exitButton){
+            Gdx.app.exit();
+        } else if (src == playButton){
+            game.setScreen(new GameScreen(game));
+        }
+        else {
+            throw new RuntimeException("Unknown src");
+        }
     }
 }
