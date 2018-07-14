@@ -87,13 +87,13 @@ public class MainShip extends Sprite {
     }
 
     public void touchDown(Vector2 touch, int pointer) {
-        if (touch.x > this.getRight() && pressedMove == false) {
+        if (touch.x > worldBounds.pos.x && pressedMove == false) {
             pressedRight = true;
             this.pointer = pointer;
             pressedMove = true;
             moveRight();
         }
-        if (touch.x < this.getLeft() && pressedMove == false) {
+        if (touch.x < worldBounds.pos.x && pressedMove == false) {
             pressedLeft = true;
             this.pointer = pointer;
             pressedMove = true;
